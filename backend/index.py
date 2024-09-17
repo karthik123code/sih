@@ -130,4 +130,4 @@ def download_docx():
     return send_file(file_path, as_attachment=True, attachment_filename='instagram_profile_data.docx')
     
 if __name__=="__main__":
-    app.run(debug=True)
+    app.run(debug=True,port=5000)
