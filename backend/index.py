@@ -124,14 +124,14 @@ def download_docx():
     #     return jsonify({'error': 'You are not logged in'}), 401
 
     # Check if the DOCX file exists
-    file_path = 'C:/Users/KARTHIK/Documents/sih/backend/instagram_profile_data.docx'
+    file_path = 'D:/Coding/SIH24/sih/backend/instagram_profile_data.docx'
     print("after path")
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
 
     # Send the file as a download response
     print("sending atach")
-    return send_file(file_path, as_attachment=True, attachment_filename='instagram_profile_data.docx')
+    return send_file(file_path, as_attachment=True, download_name='instagram_profile_data.docx')
     
 if __name__=="__main__":
     app.run(debug=True,port=5000)
