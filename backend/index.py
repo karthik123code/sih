@@ -2,10 +2,12 @@ import os
 from flask import Flask, request, jsonify, send_file, session
 import instaloader
 from docx import Document
+import json
 # from flask_pymongo import PyMongo
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 # MongoDB configuration
 # app.config["MONGO_URI"] = "mongodb+srv://amrindersingh292004:YrUO6w88OMH3piB3@clusterinstascrapper.stjux.mongodb.net/"
 # mongo = PyMongo(app)
@@ -49,10 +51,10 @@ def insta_scraper():
     try:
         # Initialize Instaloader
         L = instaloader.Instaloader()
-
+        print("before insta login")
         # Login to Instagram
         L.login(name, pwd)
-
+        print("after login login")
         # Define the profile to scrape
         profile_name = name
         profile = instaloader.Profile.from_username(L.context, profile_name)
@@ -118,15 +120,17 @@ def insta_scraper():
 @app.route('/instagram/download', methods=['GET'])
 def download_docx():
     # Check if the user is logged in
-    if 'username' not in session:
-        return jsonify({'error': 'You are not logged in'}), 401
+    # if 'username' not in session:
+    #     return jsonify({'error': 'You are not logged in'}), 401
 
     # Check if the DOCX file exists
-    file_path = 'instagram_profile_data.docx'
+    file_path = 'C:/Users/KARTHIK/Documents/sih/backend/instagram_profile_data.docx'
+    print("after path")
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
 
     # Send the file as a download response
+    print("sending atach")
     return send_file(file_path, as_attachment=True, attachment_filename='instagram_profile_data.docx')
     
 if __name__=="__main__":

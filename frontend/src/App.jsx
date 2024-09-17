@@ -6,6 +6,7 @@ import { Home } from './pages/home'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Signin } from './pages/signin'
 import { Scrapper } from './pages/Scrapper'
+import { Form } from './pages/Form'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -15,6 +16,7 @@ function App() {
     <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/signin" element={<Signin />} />
+    <Route path='/form' element={<Form />} />
     <Route path='/insta' element={<Scrapper />} />
     </Routes>
     </BrowserRouter>

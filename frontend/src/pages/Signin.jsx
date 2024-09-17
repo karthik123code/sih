@@ -5,7 +5,7 @@ import { Heading } from "../components/Heading"
 import { InputBox } from "../components/InputBox"
 import { SubHeading } from "../components/SubHeading"
 import { useNavigate } from "react-router-dom"
-// import axios from "axios"
+import axios from "axios"
 
 
 export const Signin = () => {
@@ -23,11 +23,12 @@ export const Signin = () => {
 
                 <div className="pt-4"> 
                     <Button onClick={async () => {
-                        // const response = await axios.post("http://localhost:3000/api/v1/user/signin", {
-                        //     username,
-                        //     password
-                        // });
-                        navigate('/home')
+                        const response = await axios.post("http://127.0.0.1:5000/login", {
+                            username,
+                            password
+                        });
+                        console.log(response)
+                        navigate('/')
                     }} label={"Sign In"} />
                 </div>
             </div>
