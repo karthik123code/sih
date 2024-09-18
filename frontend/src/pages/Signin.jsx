@@ -27,7 +27,8 @@ export const Signin = () => {
                             username,
                             password
                         });
-                        console.log(response)
+                        localStorage.setItem("token", response.data.token)
+                        console.log(response.data.token)
                         navigate('/')
                     }} label={"Sign In"} />
                 </div>

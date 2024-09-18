@@ -1,44 +1,66 @@
 import os
+import jwt
 from flask import Flask, request, jsonify, send_file, session
 import instaloader
 from docx import Document
+import datetime
 import json
 # from flask_pymongo import PyMongo
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = '1234'
+JWT_SECRET = 'karthik1234'  # Replace with a strong, random key
+JWT_ALGORITHM = 'HS256'
 # MongoDB configuration
 # app.config["MONGO_URI"] = "mongodb+srv://amrindersingh292004:YrUO6w88OMH3piB3@clusterinstascrapper.stjux.mongodb.net/"
 # mongo = PyMongo(app)
 
-@app.route('/', methods=['GET'])
-def home():
-    # Check if the user is logged in
-    if 'username' in session:
-        # Return a welcome message with the username
-        return jsonify({'message': f'Welcome, {session["username"]}!'}), 200
-    else:
-        # Return a message indicating that the user is not logged in
-        return jsonify({'message': 'You are not logged in'}), 401
-    
-
 @app.route('/login', methods=['POST'])
 def login():
-    # Get the request data
     data = request.get_json()
 
     # Extract the username and password from the request data
     username = data.get('username')
     password = data.get('password')
 
-    # Check if the username and password match the expected values
+    # Validate username and password
     if username == 'admin' and password == 'Parse1234':
-        # Return a success response with a JSON message
-        return jsonify({'message': 'Login successful'}), 200
+        # Generate a JWT token that expires in 1 hour
+        token = jwt.encode({
+            'username': username,
+            'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
+        }, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+        return jsonify({'message': 'Login successful', 'token': token}), 200
     else:
-        # Return an error response with a JSON message
         return jsonify({'message': 'Invalid username or password'}), 401
+
+
+@app.route('/protected', methods=['GET'])
+def protected():
+    auth_header = request.headers.get('Authorization')
+
+    if not auth_header:
+        return jsonify({'message': 'Token is missing'}), 401
+
+    try:
+        # Extract the token from the Authorization header and decode it
+        decoded_token = jwt.decode(auth_header, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+
+        # If the token is valid, return the protected resource
+        return jsonify({'message': f'Welcome, {decoded_token["username"]}!'}), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({'message': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    return jsonify({'message': 'Logout successful'}), 200
 
 @app.route('/instagram', methods=['POST'])
 def insta_scraper():
@@ -87,7 +109,7 @@ def insta_scraper():
             doc.add_paragraph('')
 
         # Save the document
-        doc.save('instagram_profile_data.docx')
+        doc.save(f'./ScrappedFiles/{profile.username}.docx')
 
         # Save the data to MongoDB
         # instagram_data = {
@@ -109,7 +131,7 @@ def insta_scraper():
         #         'video_url': post.video_url
         #     })
         # mongo.db.instagram_profiles.insert_one(instagram_data)
-
+        download_docx(name)
         return jsonify({'message': 'Data scraped and saved to instagram_profile_data.docx and MongoDB'})
 
     except instaloader.exceptions.BadCredentialsException:
@@ -118,20 +140,20 @@ def insta_scraper():
         return jsonify({'error': f'An error occurred: {e}'}), 500
 
 @app.route('/instagram/download', methods=['GET'])
-def download_docx():
+def download_docx(name):
     # Check if the user is logged in
     # if 'username' not in session:
     #     return jsonify({'error': 'You are not logged in'}), 401
 
     # Check if the DOCX file exists
-    file_path = 'C:/Users/KARTHIK/Documents/sih/backend/instagram_profile_data.docx'
+    file_path = f'./ScrappedFiles/{name}.docx'
     print("after path")
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
 
     # Send the file as a download response
     print("sending atach")
-    return send_file(file_path, as_attachment=True, attachment_filename='instagram_profile_data.docx')
-    
+    return send_file(file_path, as_attachment=True, download_name='instagram_profile_data.docx')
+
 if __name__=="__main__":
     app.run(debug=True,port=5000)

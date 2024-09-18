@@ -5,7 +5,7 @@ import axios from "axios"
 export const Scrapper = () => {
     const handleDownload = async () => {
         try {
-            const response = await axios.get('http:127.0.0.1:5000/instagram/download', {
+            const response = await axios.get('http://127.0.0.1:5000/instagram/download', {
                 responseType: 'blob',  // Important for handling binary data
             });
 
