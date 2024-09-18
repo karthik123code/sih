@@ -146,11 +146,8 @@ def download_docx(name):
     #     return jsonify({'error': 'You are not logged in'}), 401
 
     # Check if the DOCX file exists
-<<<<<<< HEAD
     file_path = f'./ScrappedFiles/{name}.docx'
-=======
     file_path = 'D:/Coding/SIH24/sih/backend/instagram_profile_data.docx'
->>>>>>> 11b34079a07ca1339487fe2a91076ce8d7a125eb
     print("after path")
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
@@ -158,10 +155,6 @@ def download_docx(name):
     # Send the file as a download response
     print("sending atach")
     return send_file(file_path, as_attachment=True, download_name='instagram_profile_data.docx')
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 11b34079a07ca1339487fe2a91076ce8d7a125eb
 if __name__=="__main__":
     app.run(debug=True,port=5000)
