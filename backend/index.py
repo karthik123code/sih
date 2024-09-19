@@ -131,7 +131,6 @@ def insta_scraper():
         #         'video_url': post.video_url
         #     })
         # mongo.db.instagram_profiles.insert_one(instagram_data)
-        download_docx(name)
         return jsonify({'message': 'Data scraped and saved to instagram_profile_data.docx and MongoDB'})
 
     except instaloader.exceptions.BadCredentialsException:
@@ -140,21 +139,21 @@ def insta_scraper():
         return jsonify({'error': f'An error occurred: {e}'}), 500
 
 @app.route('/instagram/download', methods=['GET'])
-def download_docx(name):
+def download_docx():
     # Check if the user is logged in
     # if 'username' not in session:
     #     return jsonify({'error': 'You are not logged in'}), 401
-
+    username = request.args.get('username')
     # Check if the DOCX file exists
-    file_path = f'./ScrappedFiles/{name}.docx'
-    file_path = 'D:/Coding/SIH24/sih/backend/instagram_profile_data.docx'
+    file_path = f'./ScrappedFiles/{username}.docx'
     print("after path")
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
 
     # Send the file as a download response
     print("sending atach")
-    return send_file(file_path, as_attachment=True, download_name='instagram_profile_data.docx')
+    return send_file(file_path, as_attachment=True, download_name=f'{username}.docx')
+
 
 if __name__=="__main__":
     app.run(debug=True,port=5000)
