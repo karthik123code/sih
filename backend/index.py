@@ -64,79 +64,93 @@ def logout():
 
 @app.route('/instagram', methods=['POST'])
 def insta_scraper():
-    name = request.json.get('name')
-    pwd = request.json.get('pwd')
 
-    if not name or not pwd:
-        return jsonify({'error': 'Username and password are required'}), 400
-
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return jsonify({"msg" : "u r not logged in"}) , 401
     try:
-        # Initialize Instaloader
-        L = instaloader.Instaloader()
-        print("before insta login")
-        # Login to Instagram
-        L.login(name, pwd)
-        print("after login login")
-        # Define the profile to scrape
-        profile_name = name
-        profile = instaloader.Profile.from_username(L.context, profile_name)
+        decoded_token = jwt.decode(auth_header, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        return jsonify({"message": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"message": "Invalid token"}), 401
+    
+    if decoded_token:
+        name = request.json.get('name')
+        pwd = request.json.get('pwd')
 
-        # Create a new Document
-        doc = Document()
-        doc.add_heading(f'Instagram Profile Data: {profile_name}', 0)
+        if not name or not pwd:
+            return jsonify({'error': 'Username and password are required'}), 400
 
-        # Add profile information to the document
-        doc.add_heading('Profile Information', level=1)
-        doc.add_paragraph(f'Username: {profile.username}')
-        doc.add_paragraph(f'Full Name: {profile.full_name}')
-        doc.add_paragraph(f'Biography: {profile.biography}')
-        doc.add_paragraph(f'Followers: {profile.followers}')
-        doc.add_paragraph(f'Following: {profile.followees}')
-        doc.add_paragraph(f'Number of Posts: {profile.mediacount}')
+        try:
+            # Initialize Instaloader
+            L = instaloader.Instaloader()
+            print("before insta login")
+            # Login to Instagram
+            L.login(name, pwd)
+            print("after login login")
+            # Define the profile to scrape
+            profile_name = name
+            profile = instaloader.Profile.from_username(L.context, profile_name)
 
-        # Add recent posts to the document
-        doc.add_heading('Recent Posts', level=1)
-        for post in profile.get_posts():
-            doc.add_heading(post.date.strftime('%Y-%m-%d'), level=2)
-            doc.add_paragraph(f"Post: {post.url}")
-            doc.add_paragraph(f"Caption: {post.caption}")
-            doc.add_paragraph(f'Likes: {post.likes}')
-            doc.add_paragraph(f'Comments: {post.comments}')
-            if post.video_url:
-                doc.add_paragraph(f'Video URL: {post.video_url}')
-            else:
-                doc.add_paragraph(f'Image URL: {post.url}')
-            doc.add_paragraph('')
+            # Create a new Document
+            doc = Document()
+            doc.add_heading(f'Instagram Profile Data: {profile_name}', 0)
 
-        # Save the document
-        doc.save(f'./ScrappedFiles/{profile.username}.docx')
+            # Add profile information to the document
+            doc.add_heading('Profile Information', level=1)
+            doc.add_paragraph(f'Username: {profile.username}')
+            doc.add_paragraph(f'Full Name: {profile.full_name}')
+            doc.add_paragraph(f'Biography: {profile.biography}')
+            doc.add_paragraph(f'Followers: {profile.followers}')
+            doc.add_paragraph(f'Following: {profile.followees}')
+            doc.add_paragraph(f'Number of Posts: {profile.mediacount}')
 
-        # Save the data to MongoDB
-        # instagram_data = {
-        #     'username': profile.username,
-        #     'full_name': profile.full_name,
-        #     'biography': profile.biography,
-        #     'followers': profile.followers,
-        #     'following': profile.followees,
-        #     'mediacount': profile.mediacount,
-        #     'posts': []
-        # }
-        # for post in profile.get_posts():
-        #     instagram_data['posts'].append({
-        #         'date': post.date,
-        #         'url': post.url,
-        #         'caption': post.caption,
-        #         'likes': post.likes,
-        #         'comments': post.comments,
-        #         'video_url': post.video_url
-        #     })
-        # mongo.db.instagram_profiles.insert_one(instagram_data)
-        return jsonify({'message': 'Data scraped and saved to instagram_profile_data.docx and MongoDB'})
+            # Add recent posts to the document
+            doc.add_heading('Recent Posts', level=1)
+            for post in profile.get_posts():
+                doc.add_heading(post.date.strftime('%Y-%m-%d'), level=2)
+                doc.add_paragraph(f"Post: {post.url}")
+                doc.add_paragraph(f"Caption: {post.caption}")
+                doc.add_paragraph(f'Likes: {post.likes}')
+                doc.add_paragraph(f'Comments: {post.comments}')
+                if post.video_url:
+                    doc.add_paragraph(f'Video URL: {post.video_url}')
+                else:
+                    doc.add_paragraph(f'Image URL: {post.url}')
+                doc.add_paragraph('')
 
-    except instaloader.exceptions.BadCredentialsException:
-        return jsonify({'error': 'Invalid username or password'}), 401
-    except Exception as e:
-        return jsonify({'error': f'An error occurred: {e}'}), 500
+            # Save the document
+            doc.save(f'./ScrappedFiles/{profile.username}.docx')
+
+            # Save the data to MongoDB
+            # instagram_data = {
+            #     'username': profile.username,
+            #     'full_name': profile.full_name,
+            #     'biography': profile.biography,
+            #     'followers': profile.followers,
+            #     'following': profile.followees,
+            #     'mediacount': profile.mediacount,
+            #     'posts': []
+            # }
+            # for post in profile.get_posts():
+            #     instagram_data['posts'].append({
+            #         'date': post.date,
+            #         'url': post.url,
+            #         'caption': post.caption,
+            #         'likes': post.likes,
+            #         'comments': post.comments,
+            #         'video_url': post.video_url
+            #     })
+            # mongo.db.instagram_profiles.insert_one(instagram_data)
+            return jsonify({'message': 'Data scraped and saved to instagram_profile_data.docx and MongoDB'})
+
+        except instaloader.exceptions.BadCredentialsException:
+            return jsonify({'error': 'Invalid username or password'}), 401
+        except Exception as e:
+            return jsonify({'error': f'An error occurred: {e}'}), 500
+    else:
+        return jsonify({"smtg went wrong"}) , 401
 
 @app.route('/instagram/download', methods=['GET'])
 def download_docx():

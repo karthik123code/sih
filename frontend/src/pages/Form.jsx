@@ -1,47 +1,62 @@
-import { useState } from "react"
-import { Button } from "../components/Button"
-import { Heading } from "../components/Heading"
-import { InputBox } from "../components/InputBox"
-import { SubHeading } from "../components/SubHeading"
-import axios from "axios"
+import { useState } from "react";
+import { Button } from "../components/Button";
+import { Heading } from "../components/Heading";
+import { InputBox } from "../components/InputBox";
+import { SubHeading } from "../components/SubHeading";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Form = () => {
-  const [username, setUsername] = useState("") // Changed from array to string
-  const [password, setPassword] = useState("") // Changed from array to string
-  const [scraping, setScraping] = useState(false)
-  const [error, setError] = useState(null)
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [scraping, setScraping] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleScrape = async () => {
-    setScraping(true)
-    setError(null)
+    setScraping(true);
+    setError(null);
 
     try {
-      // Send the request to scrape Instagram data
-      const response = await axios.post('http://127.0.0.1:5000/instagram', {
-        name: username,
-        pwd: password,
-      })
-
+      const response = await axios.post(
+        "http://127.0.0.1:5000/instagram",
+        { name: username, pwd: password },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      
       if (response.status === 200) {
         // After successful scraping, trigger the file download
-        const downloadUrl = await `http://127.0.0.1:5000/instagram/download?username=${username}`
+        const downloadUrl = await axios.get(`http://127.0.0.1:5000/instagram/download?username=${username}`);
 
         // Create a hidden link to trigger the file download
-        const link = document.createElement('a')
-        link.href = downloadUrl
-        link.setAttribute('download', `${username}.docx`)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute("download", `${username}.docx`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-        alert('Scraping successful! File will be downloaded.')
+        alert("Scraping successful! File will be downloaded.");
+
       }
+      console.log("before 401")
+      if (response.status === 401) {
+        navigate('/signin');
+      }
+      console.log("after 401")
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred during scraping.')
+      setError(
+        err.response?.data?.error || "An error occurred during scraping."
+      );
     } finally {
-      setScraping(false)
+      setScraping(false);
     }
-  }
+  };
+  
 
   return (
     <div className="bg-gray-800 h-screen flex justify-center">
@@ -70,9 +85,9 @@ export const Form = () => {
             />
           </div>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
