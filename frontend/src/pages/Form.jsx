@@ -30,7 +30,12 @@ export const Form = () => {
       
       if (response.status === 200) {
         // After successful scraping, trigger the file download
-        const downloadUrl = await axios.get(`http://127.0.0.1:5000/instagram/download?username=${username}`);
+        const downloadResponse = await axios.get(`http://127.0.0.1:5000/instagram/download?username=${username}`, {
+          responseType: 'blob'
+        });
+        const downloadUrl = window.URL.createObjectURL(new Blob([downloadResponse.data]));
+        
+
 
         // Create a hidden link to trigger the file download
         const link = document.createElement("a");
@@ -39,6 +44,7 @@ export const Form = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
 
         alert("Scraping successful! File will be downloaded.");
 
