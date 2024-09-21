@@ -34,17 +34,14 @@ export const Form = () => {
           responseType: 'blob'
         });
         const downloadUrl = window.URL.createObjectURL(new Blob([downloadResponse.data]));
-        
-
 
         // Create a hidden link to trigger the file download
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.setAttribute("download", `${username}.docx`);
+        link.setAttribute("download", `${username}.docx`)
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
 
         alert("Scraping successful! File will be downloaded.");
 
@@ -68,7 +65,7 @@ export const Form = () => {
     <div className="bg-gray-800 h-screen flex justify-center">
       <div className="flex flex-col justify-center">
         <div className="rounded-lg bg-gray-400 w-80 text-center p-2 h-max px-4">
-          <Heading label={"Instagram Scraper"} />
+          <Heading label={"Form"} />
           <SubHeading label={"Enter valid credentials"} />
 
           <InputBox
