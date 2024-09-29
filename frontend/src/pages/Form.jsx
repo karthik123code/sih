@@ -18,9 +18,8 @@ export const Form = () => {
     setError(null);
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/instagram",
-        { name: username, pwd: password },
+      const response = await axios.post("http://127.0.0.1:5000/instagram",{ 
+        name: username, pwd: password },
         {
           headers: {
             Authorization: localStorage.getItem("token"),
@@ -62,10 +61,15 @@ export const Form = () => {
   
 
   return (
-    <div className="bg-gray-800 h-screen flex justify-center">
+    
+    <div className="bg-slate-500 h-screen flex justify-center">
+      
       <div className="flex flex-col justify-center">
-        <div className="rounded-lg bg-gray-400 w-80 text-center p-2 h-max px-4">
-          <Heading label={"Form"} />
+        
+      <Heading label={"Instagram Scrapper"} /><br></br>
+
+        <div className="rounded-lg bg-slate-300 w-80 text-center p-2 h-max px-4">
+
           <SubHeading label={"Enter valid credentials"} />
 
           <InputBox
@@ -80,7 +84,7 @@ export const Form = () => {
             placeholder={"Enter user password"}
           />
 
-          <div className="pt-4">
+          <div className="pt-4 hover: background-color-blue">
             <Button
               onClick={handleScrape}
               label={scraping ? "Scraping..." : "Scrape Instagram"}

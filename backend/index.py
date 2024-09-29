@@ -1,5 +1,4 @@
 import os
-import time
 import jwt
 from flask import Flask, request, jsonify, send_file, session
 import instaloader
@@ -28,7 +27,7 @@ def login():
 
     # Validate username and password
     if username == 'admin' and password == 'Parse1234':
-        # Generate a JWT token that expires in 1 hour  b 
+        # Generate a JWT token that expires in 1 hour
         token = jwt.encode({
             'username': username,
             'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
@@ -106,18 +105,40 @@ def insta_scraper():
             doc.add_paragraph(f'Followers: {profile.followers}')
             doc.add_paragraph(f'Following: {profile.followees}')
             doc.add_paragraph(f'Number of Posts: {profile.mediacount}')
+            # fetching saved post
+            doc.add_heading('Saved Posts', level=1)
+            saved_posts = list(profile.get_saved_posts())
 
+            for post in saved_posts:
+                doc.add_paragraph(f"Caption: {post.caption}")
+                doc.add_paragraph(f'Likes: {post.likes}')
+                doc.add_paragraph(f'Comments: {post.comments}')
+                if post.video_url:
+                    doc.add_paragraph(f'Video URL: {post.video_url}')
+                else:
+                    doc.add_paragraph(f'Image URL: {post.url}')
+                doc.add_paragraph('')
+            # fetching similar account 
+            doc.add_heading(f'similar accounts', level=1)
+            similar_account  = profile.get_similar_accounts()
+            for account in similar_account:
+                doc.add_paragraph(f'username : {account.username}')
+                doc.add_paragraph(f'name : {account.full_name}')
+                doc.add_paragraph(f'followers : {account.followers}')
+                doc.add_paragraph(f'folloing : {account.followees}')
 
 
             # Add recent posts to the document
             doc.add_heading('Recent Posts', level=1)
-            posts = profile.get_posts()
+            posts = list(profile.get_posts())
             for post in posts:
                 doc.add_heading(post.date.strftime('%Y-%m-%d'), level=2)
-                doc.add_paragraph(f"Post: {post.url}")
                 doc.add_paragraph(f"Caption: {post.caption}")
                 doc.add_paragraph(f'Likes: {post.likes}')
-                doc.add_paragraph(f'Comments: {post.comments}')
+                doc.add_heading(f'Comments: ', level=2)
+                comments = post.get_comments()
+                for comment in comments:
+                    doc.add_paragraph(f'{comment.owner.username} : {comment.text}')
                 if post.video_url:
                     doc.add_paragraph(f'Video URL: {post.video_url}')
                 else:
